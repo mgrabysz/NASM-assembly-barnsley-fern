@@ -3,9 +3,10 @@
 
 int main(int argc, char *argv[])
 {
-	int n = 251;
+	int x = 10;
+	int y = 10;
 	
-	int output = f(n);
+	int output = f(x, y);
 	printf("%d\n", output);
 	
 	return 0;
