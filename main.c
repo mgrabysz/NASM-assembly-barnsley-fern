@@ -114,7 +114,7 @@ unsigned char *generate_empty_bitmap(unsigned int width, unsigned int height, si
 int main()
 {
     size_t bmp_size = 0;
-    unsigned char *bmp_buffer = generate_empty_bitmap(128, 128, &bmp_size);
+    unsigned char *bmp_buffer = generate_empty_bitmap(512, 512, &bmp_size);
 
 //#ifdef DEBUG
 //    printf("=====Start of initial debug info=====\n");

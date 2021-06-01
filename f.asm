@@ -32,8 +32,8 @@ color:
     mov     rcx, rsi        ; rcx = y
 
     ; intentional offset to middle of bitmap
-    add     rdx, 64
-    add     rcx, 32
+    add     rdx, 256
+    add     rcx, 64
 
     mov     rbx, [rbp-16]   ; rbx = row_size
     mov     rax, [rbp-8]    ; rax = *image_header
@@ -83,7 +83,7 @@ f1:
 
     add     rax, rbx        ; rax = x * 85 + y * 4
     add     rcx, rdx        ; rcx = x * -4 + y * 85
-    add     rcx, 1280        ; rcx += 160
+    add     rcx, 6400       ; rcx += 160
 
     jmp     check
 
@@ -95,7 +95,7 @@ f2:
 
     add     rax, rbx
     add     rcx, rdx
-    add     rcx, 352
+    add     rcx, 1760
 
     jmp     check
 
@@ -107,7 +107,7 @@ f3:
 
     add     rax, rbx
     add     rcx, rdx
-    add     rcx, 1280
+    add     rcx, 6400
 
 check:
     ; rax = 100 * new_x
