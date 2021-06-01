@@ -134,8 +134,8 @@ int main()
 //    }
 
     int x, y;
-    x = 30;
-    y = 30;
+    x = 1;
+    y = 1;
 
     f(x, y, bmp_buffer);
 
