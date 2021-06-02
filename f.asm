@@ -2,28 +2,57 @@ section .text
 
 global f
 f:
-; arguments: rdi = x, rsi = y, rdx = *image_header
+; OLD arguments: rdi = x, rsi = y, rdx = *image_header
+; NEW argumnets: rdi = *image_header, rsi = counter, rdx = prob1, rcx = prob2, r8 = prob3
 
     ; prologue
 	push	rbp
 	mov		rbp, rsp
 
-	mov     rcx, 0x4169E1   ; royal blue
+    push    rdi             ; [rbp-8] = *image_header
+    push    rsi             ; [rbp-16] = counter
+    push    rdx             ; [rbp-24] = prob1
 
+    add     rdx, rcx        ; rdx = prob2_treshold = prob1 + prob2
+    push    rdx             ; [rbp-32] = prob2_treshold
 
-	mov     rax, 1000000       ; counter
+    add     rdx, r8         ; rdx = prob3_treshold = prob1 + prob2 + prob3
+    push    rdx             ; [rbp-40] = prob3_treshold
 
-    mov     rbx, [rdx+18]   ; rbx = width of image
+	mov     rcx, 0x4169E1   ; royal blue 4169E1
+	push    rcx             ; [rbp-48] = color
 
     ;calculate row
+    mov     rbx, [rdi+18]   ; rbx = width of image
     imul    rbx, 3          ; rbx = rbx * 3
     add     rbx, 3
     and     ebx, 0xFFFFFFFC ; possible padding
+    push    rbx             ; [rbp-56] = row_size
 
-    push    rdx             ; [rbp-8] = *image_header
-    push    rbx             ; [rbp-16] = row_size
-    push    rcx             ; [rbp-24] = color
-    push    rax             ; [rbp-32] = counter
+    ; stack content
+    ; [rbp-8] = *image_header
+    ; [rbp-16] = counter
+    ; [rbp-24] = prob1
+    ; [rbp-32] = prob2_treshold
+    ; [rbp-40] = prob3_treshold
+    ; [rbp-48] = color
+    ; [rbp-56] = row_size
+
+    ; white
+    mov     rcx, [rdi+2]    ; rcx = file size
+    sub     rcx, 54         ; rcx = number of bytes
+    add     rdi, 54         ; rdi = *first_byte
+
+white_loop:
+    mov     byte [rdi], 0xAA
+    inc     rdi             ; rdi = *next_byte
+    dec     rcx             ; number_of_bytes--
+    cmp     rcx, 0
+    jnz     white_loop      ; if number_of_bytes != 0 than goto white_loop
+
+    ; set starting (x, y) = (0, 0)
+    mov     rdi, 0
+    mov     rsi, 0
 
 color:
 ; arguments: rdi = x, rsi = y
@@ -35,7 +64,7 @@ color:
     add     rdx, 512
     add     rcx, 128
 
-    mov     rbx, [rbp-16]   ; rbx = row_size
+    mov     rbx, [rbp-56]   ; rbx = row_size
     mov     rax, [rbp-8]    ; rax = *image_header
 
     imul    rbx, rcx        ; rbx = row_size * y
@@ -47,28 +76,29 @@ color:
     add     rbx, 54         ; rbx = pixel absolute address
 
     ;copy to memory
-    mov     rdx, [rbp-24]   ; rdx = 0x00RRGGBB
+    mov     rdx, [rbp-48]   ; rdx = 0x00RRGGBB
     mov     [rbx], dx       ; store GGBB
     shr     rdx, 16         ; in edx now 0x000000RR
     mov     [rbx+2], dl     ; store red
 
 
+begin:
     ; begin of coordinate generator
     ; arguments: rdi = x, rsi = y
-begin:
+
     ; random number generator 0-99
     xor     rdx, rdx
     rdrand  rax
 	mov     rcx, 100
     div     rcx         ; rdx = random(0-99)
 
-    cmp     rdx, 85
+    cmp     rdx, [rbp-24]   ; if rdx < prob1 than goto f1
     jl      f1
-    cmp     rdx, 92
+    cmp     rdx, [rbp-32]   ; if rdx < prob2_treshold than goto f2
     jl      f2
-    cmp     rdx, 99
+    cmp     rdx, [rbp-40]   ; if rdx < prob3_treshold than goto f3
     jl      f3
-
+                            ; else goto f4
 f4:
     xor     rax, rax        ; rax = 0
     imul    rcx, rsi, 16    ; rcx = y * 16
@@ -140,8 +170,8 @@ check:
     mov     rsi, rax    ; rsi = new_y
 
     ; check counter
-    dec     qword [rbp-32]
-    mov     rax, [rbp-32]
+    dec     qword [rbp-16]
+    mov     rax, [rbp-16]
     cmp     rax, 0
     jnz     color
 

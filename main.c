@@ -104,10 +104,10 @@ unsigned char *generate_empty_bitmap(unsigned int width, unsigned int height, si
     header.height = height;
 
     memcpy(bitmap, &header, BMP_HEADER_SIZE);
-    for(int i = BMP_HEADER_SIZE; i < *output_size; ++i)
-    {
-        bitmap[i] = 0xff;
-    }
+//    for(int i = BMP_HEADER_SIZE; i < *output_size; ++i)
+//    {
+//        bitmap[i] = 0xff;
+//    }
     return bitmap;
 }
 
@@ -120,29 +120,25 @@ int main()
     unsigned char *bmp_buffer = generate_empty_bitmap(1024, 1024, &bmp_size);
 
 
-    int x, y;
-    x = 1;
-    y = 1;
-
-    f(x, y, bmp_buffer);
+    f(bmp_buffer, 1000000, 85, 7, 7);
 
     write_bytes_to_bmp(bmp_buffer, bmp_size);//save bmp buffer into file
     free(bmp_buffer); //deallocate bmp buffer
 
-
-    ALLEGRO_DISPLAY *Screen;
-    ALLEGRO_BITMAP *Image = NULL; ///object the holds the graphic. initialize it empty
-
-    al_init();
-    al_init_image_addon(); /// this must be called to load images. has to be called after al_init
-
-    Screen = al_create_display(1024, 1024);
-
-    Image = al_load_bitmap("output.bmp"); ///load the bitmap from a file
-    al_draw_bitmap(Image, 0, 0, 0);
-    al_flip_display();
-    al_rest(20.0);
-    al_destroy_display(Screen);
+    //printf("%d\n", essa);
+//    ALLEGRO_DISPLAY *Screen;
+//    ALLEGRO_BITMAP *Image = NULL; ///object the holds the graphic. initialize it empty
+//
+//    al_init();
+//    al_init_image_addon(); /// this must be called to load images. has to be called after al_init
+//
+//    Screen = al_create_display(1024, 1024);
+//
+//    Image = al_load_bitmap("output.bmp"); ///load the bitmap from a file
+//    al_draw_bitmap(Image, 0, 0, 0);
+//    al_flip_display();
+//    al_rest(2.0);
+//    al_destroy_display(Screen);
 
     return 0;
 }
