@@ -1,8 +1,10 @@
 CC=gcc
 CFLAGS=-m64 -Wall
+LDFLAGS=-L/usr/local/lib -lallegro -lallegro_image
+INCLUDE=-I. -I/usr/local/include/allegro5
 
 all:	main.o f.o
-	$(CC) $(CFLAGS) main.o f.o -o fun
+	$(CC) $(CFLAGS) main.o f.o -o fun $(INCLUDE) $(LDFLAGS)
 	
 main.o:	old_main.c
 	$(CC) $(CFLAGS) -c main.c -o main.o

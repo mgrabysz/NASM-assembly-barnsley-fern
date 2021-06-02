@@ -5,6 +5,9 @@
 
 #include "f.h"
 
+#include<allegro5/allegro.h>  //adding libraries
+#include <allegro5/allegro_image.h>
+
 #define DEBUG 1
 #pragma pack(1)
 
@@ -116,22 +119,6 @@ int main()
     size_t bmp_size = 0;
     unsigned char *bmp_buffer = generate_empty_bitmap(1024, 1024, &bmp_size);
 
-//#ifdef DEBUG
-//    printf("=====Start of initial debug info=====\n");
-//    printf("Header struct size [bytes]: %d\n", sizeof(BmpHeader));
-//    printf("Bmp buffer size: %d\n", bmp_size);
-//    printf("=====End of initial debug info=======\n");
-//#endif
-
-//    for(int i = 0; i < 12; ++i)
-//    {
-//        set_pixel(bmp_buffer, i, 2, 0x00FF0000);
-//        set_pixel(bmp_buffer, i, 3, 0x0010EEDD);
-//        unsigned int result = get_pixel(bmp_buffer, i, 2);
-//        unsigned int result2 = get_pixel(bmp_buffer, i, 3);
-//        printf("Pixel at position x: %d, y: %d, color: %X\n", i, 2, result);
-//        printf("Pixel at position x: %d, y: %d, color: %X\n", i, 3, result2);
-//    }
 
     int x, y;
     x = 1;
@@ -141,5 +128,21 @@ int main()
 
     write_bytes_to_bmp(bmp_buffer, bmp_size);//save bmp buffer into file
     free(bmp_buffer); //deallocate bmp buffer
+
+
+    ALLEGRO_DISPLAY *Screen;
+    ALLEGRO_BITMAP *Image = NULL; ///object the holds the graphic. initialize it empty
+
+    al_init();
+    al_init_image_addon(); /// this must be called to load images. has to be called after al_init
+
+    Screen = al_create_display(1024, 1024);
+
+    Image = al_load_bitmap("output.bmp"); ///load the bitmap from a file
+    al_draw_bitmap(Image, 0, 0, 0);
+    al_flip_display();
+    al_rest(20.0);
+    al_destroy_display(Screen);
+
     return 0;
 }
