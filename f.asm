@@ -2,8 +2,7 @@ section .text
 
 global f
 f:
-; OLD arguments: rdi = x, rsi = y, rdx = *image_header
-; NEW argumnets: rdi = *image_header, rsi = counter, rdx = prob1, rcx = prob2, r8 = prob3
+; argumnets: rdi = *image_header, rsi = counter, rdx = prob1, rcx = prob2, r8 = prob3
 
     ; prologue
 	push	rbp
@@ -19,7 +18,7 @@ f:
     add     rdx, r8         ; rdx = prob3_treshold = prob1 + prob2 + prob3
     push    rdx             ; [rbp-40] = prob3_treshold
 
-	mov     rcx, 0x4169E1   ; royal blue 4169E1
+	mov     rcx, 0xFF00FF   ; royal blue 4169E1
 	push    rcx             ; [rbp-48] = color
 
     ;calculate row
