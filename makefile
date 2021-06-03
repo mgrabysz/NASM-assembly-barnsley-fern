@@ -6,7 +6,7 @@ INCLUDE=-I. -I/usr/local/include/allegro5
 all:	main.o f.o
 	$(CC) $(CFLAGS) main.o f.o -o fun $(INCLUDE) $(LDFLAGS)
 	
-main.o:	old_main.c
+main.o:
 	$(CC) $(CFLAGS) -c main.c -o main.o
 	
 f.o:	f.asm

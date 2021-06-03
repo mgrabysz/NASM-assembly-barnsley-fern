@@ -125,20 +125,19 @@ int main()
     write_bytes_to_bmp(bmp_buffer, bmp_size);//save bmp buffer into file
     free(bmp_buffer); //deallocate bmp buffer
 
-    //printf("%d\n", essa);
-//    ALLEGRO_DISPLAY *Screen;
-//    ALLEGRO_BITMAP *Image = NULL; ///object the holds the graphic. initialize it empty
-//
-//    al_init();
-//    al_init_image_addon(); /// this must be called to load images. has to be called after al_init
-//
-//    Screen = al_create_display(1024, 1024);
-//
-//    Image = al_load_bitmap("output.bmp"); ///load the bitmap from a file
-//    al_draw_bitmap(Image, 0, 0, 0);
-//    al_flip_display();
-//    al_rest(2.0);
-//    al_destroy_display(Screen);
+    ALLEGRO_DISPLAY *Screen;
+    ALLEGRO_BITMAP *Image = NULL; ///object the holds the graphic. initialize it empty
+
+    al_init();
+    al_init_image_addon(); /// this must be called to load images. has to be called after al_init
+
+    Screen = al_create_display(1024, 1024);
+
+    Image = al_load_bitmap("output.bmp"); ///load the bitmap from a file
+    al_draw_bitmap(Image, 0, 0, 0);
+    al_flip_display();
+    al_rest(5.0);
+    al_destroy_display(Screen);
 
     return 0;
 }
