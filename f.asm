@@ -18,10 +18,10 @@ f:
     add     rdx, r8         ; rdx = prob3_treshold = prob1 + prob2 + prob3
     push    rdx             ; [rbp-40] = prob3_treshold
 
-	mov     rcx, 0xFF00FF   ; royal blue 4169E1
+	mov     rcx, 0x4169E1   ; royal blue 4169E1
 	push    rcx             ; [rbp-48] = color
 
-    ;calculate row
+    ; calculate row
     mov     rbx, [rdi+18]   ; rbx = width of image
     imul    rbx, 3          ; rbx = rbx * 3
     add     rbx, 3
@@ -59,9 +59,20 @@ color:
     mov     rdx, rdi        ; rdx = x
     mov     rcx, rsi        ; rcx = y
 
-    ; intentional offset to middle of bitmap
-    add     rdx, 512        ; 1/2 width
-    add     rcx, 128        ; 1/8 height
+    ; calculate vector [1/2 width, 1/8 height]
+    mov     rbx, [rbp-8]    ; rbx = *image header
+
+    ; x shift = 1/2 width
+    xor     rax, rax
+    mov     eax, [rbx+18]   ; rax = width of image
+    shr     rax, 1          ; rax = 1/2 width
+    add     rdx, rax        ; x shift by vector
+
+    ; y shift = 1/8 height
+    xor     rax, rax
+    mov     eax, [rbx+22]   ; rax = width of image
+    shr     rax, 3          ; rax = 1/8 height
+    add     rcx, rax        ; y shift by vector
 
     ; check if coordinates are correct
 
@@ -90,13 +101,13 @@ color:
 
     imul    rbx, rcx        ; rbx = row_size * y
 
-    ; calculate column
+    ; calculate absolute address
     imul    rdx, 3          ; rdx = 3*x
     add     rbx, rdx        ; rbx = pixel_relative_address
     add     rbx, rax        ; rbx = header_adress + pixel_relative_adress
     add     rbx, 54         ; rbx = pixel absolute address
 
-    ; copy to memory
+    ; fill with RGB
     mov     rdx, [rbp-48]   ; rdx = 0x00RRGGBB
     mov     [rbx], dx       ; store GGBB
     shr     rdx, 16         ; in edx now 0x000000RR
@@ -111,7 +122,7 @@ coordinates:
     xor     rdx, rdx
     rdrand  rax
 	mov     rcx, 100
-    div     rcx         ; rdx = random(0-99)
+    div     rcx             ; rdx = random(0-99)
 
     ; choose a function
     cmp     rdx, [rbp-24]   ; if rdx < prob1 than goto f1
@@ -168,24 +179,22 @@ finish:
     ; rcx = 100 * new_y
 
     ; new x division by 100
-    xor     rdx, rdx    ; rdx = 0
     mov     rbx, 100    ; rdx = 100
     cqo                 ; filling rdx with most significant bit of rax
     idiv    rbx         ; rax = new_x
     mov     rdi, rax    ; rdi = new_x
 
     ; new y division by 100
-    xor     rdx, rdx    ; rdx = 0
     mov     rax, rcx    ; rax = 100 * new_y
     cqo                 ; filling rdx with most significant bit of rax
     idiv    rbx         ; rax = new_y
     mov     rsi, rax    ; rsi = new_y
 
     ; check counter
-    dec     qword [rbp-16]
+    dec     qword [rbp-16]  ; decrement counter
     mov     rax, [rbp-16]
     cmp     rax, 0
-    jnz     color
+    jnz     color           ; if counter != 0 than goto color
 
 
     ; epilogue
