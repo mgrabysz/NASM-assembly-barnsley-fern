@@ -138,7 +138,7 @@ f1:
 
     add     rax, rbx        ; rax = x * 85 + y * 4
     add     rcx, rdx        ; rcx = x * -4 + y * 85
-    add     rcx, 12800      ; rcx += 160
+    add     rcx, 12800
 
     jmp     finish
 
