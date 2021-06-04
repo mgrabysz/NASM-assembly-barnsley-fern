@@ -146,5 +146,7 @@ int main()
     al_destroy_display(Screen);
     free(bmp_buffer);
 
+    printf("Hasta la vista\n");
+
     return 0;
 }
