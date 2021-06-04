@@ -88,25 +88,63 @@ int main()
     size_t bmp_size = 0;
     unsigned char *bmp_buffer = generate_empty_bitmap(1024, 1024, &bmp_size);
 
+    int counter, prob1, prob2, prob3, value, sum, is_displayed = 0;
+    char exit[3];
+    char no[3] = "n";
 
-    f(bmp_buffer, 1000000, 85, 7, 7);
-
-    write_bytes_to_bmp(bmp_buffer, bmp_size); //save bmp buffer into file
-    free(bmp_buffer); //deallocate bmp buffer
 
     ALLEGRO_DISPLAY *Screen;
     ALLEGRO_BITMAP *Image = NULL;
 
-    al_init();
-    al_init_image_addon();
 
-    Screen = al_create_display(1024, 1024);
+    do {
+        printf("Enter number of steps: ");
+        scanf("%d", &counter);
 
-    Image = al_load_bitmap("barnsley_fern.bmp");
-    al_draw_bitmap(Image, 0, 0, 0);
-    al_flip_display();
-    al_rest(5.0);
+        printf("Enter probability of calling f1: ");
+        scanf("%d", &prob1);
+
+        printf("Enter probability of calling f2: ");
+        scanf("%d", &prob2);
+
+        printf("Enter probability of calling f3: ");
+        scanf("%d", &prob3);
+
+        sum = prob1 + prob2+ prob3;
+        if (sum >= 100) {
+            printf("These values are not correct\n");
+            continue;
+        }
+
+        printf("Probability of calling f4 is computed automatically\n");
+
+        if (is_displayed == 1) {
+            al_destroy_display(Screen);
+        }
+
+        f(bmp_buffer, counter, prob1, prob2, prob3);
+
+        write_bytes_to_bmp(bmp_buffer, bmp_size); //save bmp buffer into file
+
+        al_init();
+        al_init_image_addon();
+
+        Screen = al_create_display(1024, 1024);
+        is_displayed = 1;
+
+        Image = al_load_bitmap("barnsley_fern.bmp");
+        al_draw_bitmap(Image, 0, 0, 0);
+        al_flip_display();
+        // al_rest(5.0);
+
+        printf("Do you want to quit? [y/n]: ");
+        scanf("%s", exit);;
+        value=strcmp(exit, no);
+
+    } while (value == 0);
+
     al_destroy_display(Screen);
+    free(bmp_buffer);
 
     return 0;
 }
