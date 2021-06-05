@@ -40,14 +40,15 @@ f:
     ; white
     mov     rcx, [rdi+2]    ; rcx = file size
     sub     rcx, 54         ; rcx = number of bytes
+    shr     rcx, 2          ; rcx = 1/4 * number of bytes = number of dwords
     add     rdi, 54         ; rdi = *first_byte
 
 white_loop:
-    mov     byte [rdi], 0xFF
-    inc     rdi             ; rdi = *next_byte
-    dec     rcx             ; number_of_bytes--
+    mov     dword [rdi], 0xFFFFFFFF
+    add     rdi, 4          ; rdi = *next_dword
+    dec     rcx             ; number of dwords--
     cmp     rcx, 0
-    jnz     white_loop      ; if number_of_bytes != 0 than goto white_loop
+    jnz     white_loop      ; if number_of_dwords != 0 than goto white_loop
 
     ; set starting (x, y) = (0, 0)
     mov     rdi, 0
@@ -70,7 +71,7 @@ color:
 
     ; y shift = 1/8 height
     xor     rax, rax
-    mov     eax, [rbx+22]   ; rax = width of image
+    mov     eax, [rbx+22]   ; rax = height of image
     shr     rax, 3          ; rax = 1/8 height
     add     rcx, rax        ; y shift by vector
 
@@ -83,9 +84,7 @@ color:
     jl      coordinates
 
     ; check if x < width and y < height
-    mov     rbx, [rbp-8]    ; rbx = *image header
     xor     rax, rax
-
     mov     eax, [rbx+18]   ; rax = width of image
     cmp     rdx, rax
     jge     coordinates     ; if x >= width than goto coordinates
@@ -95,13 +94,10 @@ color:
     jge     coordinates     ; if y >= height than goto coordinates
 
     ; calculate pixel address
-
+    mov     rax, rbx        ; rax = *image_header
     mov     rbx, [rbp-56]   ; rbx = row_size
-    mov     rax, [rbp-8]    ; rax = *image_header
-
+    
     imul    rbx, rcx        ; rbx = row_size * y
-
-    ; calculate absolute address
     imul    rdx, 3          ; rdx = 3*x
     add     rbx, rdx        ; rbx = pixel_relative_address
     add     rbx, rax        ; rbx = header_adress + pixel_relative_adress
