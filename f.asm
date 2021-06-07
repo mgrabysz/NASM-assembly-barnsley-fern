@@ -9,34 +9,34 @@ f:
 	push	rbp
 	mov		rbp, rsp
 
-    push    rdi             ; [rbp-8] = *image_header
-    push    rsi             ; [rbp-16] = counter
-    push    rdx             ; [rbp-24] = prob1
+    mov     r14, rdi        ; r14 = *image_header
+    mov     r13, rsi        ; r13 = counter
+    mov     r12, rdx        ; r12 = prob1
 
     add     rdx, rcx        ; rdx = prob2_treshold = prob1 + prob2
-    push    rdx             ; [rbp-32] = prob2_treshold
+    mov     r11, rdx        ; r11 = prob2_treshold
 
     add     rdx, r8         ; rdx = prob3_treshold = prob1 + prob2 + prob3
-    push    rdx             ; [rbp-40] = prob3_treshold
+    mov     r10, rdx        ; r10 = prob3_treshold
 
 	mov     rcx, 0x4169E1   ; royal blue 4169E1
-	push    rcx             ; [rbp-48] = color
+    mov     r9, rcx         ; r9 = color
 
     ; calculate row
     mov     rbx, [rdi+18]   ; rbx = width of image
     imul    rbx, 3          ; rbx = rbx * 3
     add     rbx, 3
     and     ebx, 0xFFFFFFFC ; possible padding
-    push    rbx             ; [rbp-56] = row_size
+    mov     r8, rbx         ; r8 = row_size
 
-    ; stack content
-    ; [rbp-8] = *image_header
-    ; [rbp-16] = counter
-    ; [rbp-24] = prob1
-    ; [rbp-32] = prob2_treshold
-    ; [rbp-40] = prob3_treshold
-    ; [rbp-48] = color
-    ; [rbp-56] = row_size
+    ; variables in registers:
+    ; r14 = *image_header
+    ; r13 = counter
+    ; r12 = prob1
+    ; r11 = prob2_treshold
+    ; r10 = prob3_treshold
+    ; r9 = color
+    ; r8 = row_size
 
     ; white
     mov     rcx, [rdi+2]    ; rcx = file size
@@ -62,7 +62,7 @@ color:
     mov     rcx, rsi        ; rcx = y
 
     ; calculate vector [1/2 width, 1/8 height]
-    mov     rbx, [rbp-8]    ; rbx = *image header
+    mov     rbx, r14        ; rbx = *image header
 
     ; x shift = 1/2 width
     xor     rax, rax
@@ -96,7 +96,7 @@ color:
 
     ; calculate pixel address
     mov     rax, rbx        ; rax = *image_header
-    mov     rbx, [rbp-56]   ; rbx = row_size
+    mov     rbx, r8         ; rbx = row_size
 
     imul    rbx, rcx        ; rbx = row_size * y
     imul    rdx, 3          ; rdx = 3*x
@@ -105,7 +105,7 @@ color:
     add     rbx, 54         ; rbx = pixel absolute address
 
     ; fill with RGB
-    mov     rdx, [rbp-48]   ; rdx = 0x00RRGGBB
+    mov     rdx, r9         ; rdx = 0x00RRGGBB
     mov     [rbx], dx       ; store GGBB
     shr     rdx, 16         ; in edx now 0x000000RR
     mov     [rbx+2], dl     ; store red
@@ -122,11 +122,11 @@ coordinates:
     div     rcx             ; rdx = random(0-99)
 
     ; choose a function
-    cmp     rdx, [rbp-24]   ; if rdx < prob1 than goto f1
+    cmp     rdx, r12        ; if rdx < prob1 than goto f1
     jl      f1
-    cmp     rdx, [rbp-32]   ; if rdx < prob2_treshold than goto f2
+    cmp     rdx, r11        ; if rdx < prob2_treshold than goto f2
     jl      f2
-    cmp     rdx, [rbp-40]   ; if rdx < prob3_treshold than goto f3
+    cmp     rdx, r10        ; if rdx < prob3_treshold than goto f3
     jl      f3
                             ; else goto f4
 
@@ -224,8 +224,8 @@ finish:
     mov         rsi, rax    ; rsi = new_y
 
     ; check counter
-    dec     qword [rbp-16]  ; decrement counter
-    mov     rax, [rbp-16]
+    dec     r13             ; decrement counter
+    mov     rax, r13
     cmp     rax, 0
     jnz     color           ; if counter != 0 than goto color
 
