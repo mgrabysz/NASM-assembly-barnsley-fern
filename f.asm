@@ -1,3 +1,4 @@
+%use fp
 section .text
 
 global f
@@ -96,7 +97,7 @@ color:
     ; calculate pixel address
     mov     rax, rbx        ; rax = *image_header
     mov     rbx, [rbp-56]   ; rbx = row_size
-    
+
     imul    rbx, rcx        ; rbx = row_size * y
     imul    rdx, 3          ; rdx = 3*x
     add     rbx, rdx        ; rbx = pixel_relative_address
@@ -129,62 +130,98 @@ coordinates:
     jl      f3
                             ; else goto f4
 
-    ; barnsley fern functions
+; barnsley fern functions
+; arguments: rdi = x (int), rsi = y (int)
+; returns: xmm0 = x (float), xmm1 = y (float)
+; constants 1.6 and 0.44 are multiplied by 80 to rescale the image
+
 f4:
-    xor     rax, rax        ; rax = 0
-    imul    rcx, rsi, 16    ; rcx = y * 16
+    mov         rax, float64(0.0)
+    movq        xmm0, rax           ; xmm0 = 0.0
+    mov         rax, float64(0.16)
+    movq        xmm2, rax           ; xmm2 = 0.16
+    cvtsi2sd    xmm1, rsi           ; xmm1 = float(y)
+    mulsd       xmm1, xmm2          ; xmm1 = y * 0.16 (new y)
 
     jmp     finish
 
 f1:
-    imul    rax, rdi, 85    ; rax = x * 85
-    imul    rbx, rsi, 4     ; rbx = y * 4
-    imul    rcx, rdi, -4    ; rcx = x * -4
-    imul    rdx, rsi, 85    ; rdx = y * 85
+    cvtsi2sd    xmm2, rdi       ; xmm2 = float(x)
+    cvtsi2sd    xmm3, rsi       ; xmm3 = float(y)
+    mov     rax, float64(0.85)
+    movq    xmm0, rax           ; xmm0 = 0.85
+    mulsd   xmm0, xmm2          ; xmm0 = x*0.85
+    mov     rax, float64(0.04)
+    movq    xmm4, rax           ; xmm4 = 0.04
+    mulsd   xmm4, xmm3          ; xmm4 = y*0.04
+    addsd   xmm0, xmm4          ; xmm0 = x*0.85 + y*0.04 (new x)
 
-    add     rax, rbx        ; rax = x * 85 + y * 4
-    add     rcx, rdx        ; rcx = x * -4 + y * 85
-    add     rcx, 12800
+    mov     rax, float64(-0.04)
+    movq    xmm1, rax           ; xmm1 = -0.04
+    mulsd   xmm1, xmm2          ; xmm1 = x*-0.04
+    mov     rax, float64(0.85)
+    movq    xmm4, rax           ; xmm4 = 0.85
+    mulsd   xmm4, xmm3          ; xmm4 = y*0.85
+    addsd   xmm1, xmm4          ; xmm1 = x*-0.04 + y*0.85
+    mov     rax, float64(128.0) ; constant 1.6 multiplied by 80
+    movq    xmm4, rax           ; xmm4 = 128.0
+    addsd   xmm1, xmm4          ; xmm3 = x*-0.04 + y*0.85 + 128.0 (new y)
 
     jmp     finish
 
 f2:
-    imul    rax, rdi, -15
-    imul    rbx, rsi, 28
-    imul    rcx, rdi, 26
-    imul    rdx, rsi, 24
+    cvtsi2sd    xmm2, rdi       ; xmm2 = float(x)
+    cvtsi2sd    xmm3, rsi       ; xmm3 = float(y)
+    mov     rax, float64(-0.15)
+    movq    xmm0, rax           ; xmm0 = -0.15
+    mulsd   xmm0, xmm2          ; xmm2 = x*-0.15
+    mov     rax, float64(0.28)
+    movq    xmm4, rax           ; xmm4 = 0.28
+    mulsd   xmm4, xmm3          ; xmm4 = y*0.28
+    addsd   xmm0, xmm4          ; xmm2 = x*-0.15 + y*0.28 (new x)
 
-    add     rax, rbx
-    add     rcx, rdx
-    add     rcx, 3520
+    mov     rax, float64(0.26)  ; rax = 0.26
+    movq    xmm1, rax           ; xmm1 = 0.26
+    mulsd   xmm1, xmm2          ; xmm1 = x*0.26
+    mov     rax, float64(0.24)
+    movq    xmm4, rax           ; xmm4 = 0.24
+    mulsd   xmm4, xmm3          ; xmm4 = y*0.24
+    addsd   xmm1, xmm4          ; xmm1 = x*0.26 + y*0.24
+    mov     rax, float64(35.2)  ; constant 0.44 multiplied by 80
+    movq    xmm4, rax           ; xmm4 = 35.2
+    addsd   xmm1, xmm4          ; xmm1 = x*0.26 + y*0.24 + 35.2 (new y)
 
     jmp     finish
 
 f3:
-    imul    rax, rdi, 20
-    imul    rbx, rsi, -26
-    imul    rcx, rdi, 23
-    imul    rdx, rsi, 22
+    cvtsi2sd    xmm2, rdi       ; xmm2 = float(x)
+    cvtsi2sd    xmm3, rsi       ; xmm3 = float(y)
+    mov     rax, float64(0.20)
+    movq    xmm0, rax           ; xmm0 = 0.20
+    mulsd   xmm0, xmm2          ; xmm0 = x*0.20
+    mov     rax, float64(-0.26)
+    movq    xmm4, rax           ; xmm4 = -0.26
+    mulsd   xmm4, xmm3          ; xmm4 = y*-0.26
+    addsd   xmm0, xmm4          ; xmm0 = x*0.20 + y*-0.26 (new x)
 
-    add     rax, rbx
-    add     rcx, rdx
-    add     rcx, 12800
+    mov     rax, float64(0.23)  ; rax = 0.23
+    movq    xmm1, rax           ; xmm1 = 0.23
+    mulsd   xmm1, xmm2          ; xmm1 = x*0.23
+    mov     rax, float64(0.22)
+    movq    xmm4, rax           ; xmm4 = 0.22
+    mulsd   xmm4, xmm3          ; xmm4 = y*0.22
+    addsd   xmm1, xmm4          ; xmm1 = x*0.23 + y*0.22
+    mov     rax, float64(128.0) ; constant 1.6 multiplied by 80
+    movq    xmm4, rax           ; xmm4 = 128
+    addsd   xmm1, xmm4          ; xmm3 = x*0.23 + y*0.22 + 128
 
 finish:
-    ; rax = 100 * new_x
-    ; rcx = 100 * new_y
+; sets new coords to rdi and rsi
+    cvtsd2si    rax, xmm0
+    mov         rdi, rax    ; rdi = new_x
 
-    ; new x division by 100
-    mov     rbx, 100    ; rdx = 100
-    cqo                 ; filling rdx with most significant bit of rax
-    idiv    rbx         ; rax = new_x
-    mov     rdi, rax    ; rdi = new_x
-
-    ; new y division by 100
-    mov     rax, rcx    ; rax = 100 * new_y
-    cqo                 ; filling rdx with most significant bit of rax
-    idiv    rbx         ; rax = new_y
-    mov     rsi, rax    ; rsi = new_y
+    cvtsd2si    rax, xmm1
+    mov         rsi, rax    ; rsi = new_y
 
     ; check counter
     dec     qword [rbp-16]  ; decrement counter
